@@ -2,8 +2,10 @@
 import psycopg2
 import boto3
 from botocore.client import Config
+import pytest
 
 
+@pytest.fixture(autouse=True, scope='module')
 def prepare():
     s3 = boto3.client(
         's3',
@@ -23,7 +25,6 @@ def prepare():
 
 
 def test_select():
-    prepare()
     con = psycopg2.connect('host=localhost port=5432 user=postgres')
     cur = con.cursor()
     cur.execute('DROP FOREIGN TABLE IF EXISTS ncos_example;')
