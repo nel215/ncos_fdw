@@ -17,6 +17,7 @@ class NCOSForeignDataWrapper(ForeignDataWrapper):
         self.secret_key = options['secret_key']
         self.bucket = options['bucket']
         self.prefix = options['prefix']
+        self.store_as = options['store_as']
         log_to_postgres(message=str(options), level=logging.WARNING)
 
     def execute(self, quals, columns):

@@ -41,7 +41,8 @@ def test_select():
                    prefix 'path',\
                    endpoint 'http://localhost:4569',\
                    access_key 'access_key',\
-                   secret_key 'secret_key'\
+                   secret_key 'secret_key',\
+                   store_as 'text'\
                  );")
     con.commit()
     cur.execute("SELECT * FROM ncos_example")
