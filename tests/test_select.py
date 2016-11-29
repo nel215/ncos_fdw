@@ -5,8 +5,21 @@ from botocore.client import Config
 import pytest
 
 
-@pytest.fixture(autouse=True, scope='module')
-def prepare():
+@pytest.fixture(
+    scope='module',
+    params=[
+        'text',
+    ],
+)
+def store_as(request):
+    return request.param
+
+
+@pytest.fixture(
+    autouse=True,
+    scope='module',
+)
+def prepare(store_as):
     s3 = boto3.client(
         's3',
         aws_access_key_id='access_key',
@@ -24,7 +37,7 @@ def prepare():
     s3.put_object(Bucket='test', Key='path/to', Body=payload.encode())
 
 
-def test_select():
+def test_select(store_as):
     con = psycopg2.connect('host=localhost port=5432 user=postgres')
     cur = con.cursor()
     cur.execute('DROP FOREIGN TABLE IF EXISTS ncos_example;')
@@ -43,8 +56,8 @@ def test_select():
                    endpoint 'http://localhost:4569',\
                    access_key 'access_key',\
                    secret_key 'secret_key',\
-                   store_as 'text'\
-                 );")
+                   store_as '{}'\
+                 );".format(store_as))
     con.commit()
     cur.execute("SELECT * FROM ncos_example")
     assert cur.fetchall() == [
