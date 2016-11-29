@@ -2,6 +2,7 @@
 from multicorn import ForeignDataWrapper
 from multicorn.utils import log_to_postgres
 import logging
+import zlib
 import json
 import boto3
 from botocore.client import Config
@@ -33,6 +34,9 @@ class NCOSForeignDataWrapper(ForeignDataWrapper):
         obj_list = s3.list_objects(Bucket=self.bucket, Prefix=self.prefix)
         for c in obj_list['Contents']:
             res = s3.get_object(Bucket=self.bucket, Key=c['Key'])
-            for row in res['Body'].read().split('\n'):
+            body = res['Body'].read()
+            if self.store_as == 'gzip':
+                body = zlib.decompress(body)
+            for row in body.split('\n'):
                 record = json.loads(row.split('\t')[2])
                 yield record

@@ -3,12 +3,14 @@ import psycopg2
 import boto3
 from botocore.client import Config
 import pytest
+import zlib
 
 
 @pytest.fixture(
     scope='module',
     params=[
         'text',
+        'gzip',
     ],
 )
 def store_as(request):
@@ -34,7 +36,9 @@ def prepare(store_as):
         '2016-11-11T11:11:11\ttag.example\t{"id": 1, "key": "v1"}',
         '2016-11-11T11:11:11\ttag.example\t{"id": 2, "key": "v2", "foo": "bar"}',  # nopep8
     ])
-    s3.put_object(Bucket='test', Key='path/to', Body=payload.encode())
+    if store_as == 'gzip':
+        payload = zlib.compress(payload)
+    s3.put_object(Bucket='test', Key='path/to', Body=payload)
 
 
 def test_select(store_as):
