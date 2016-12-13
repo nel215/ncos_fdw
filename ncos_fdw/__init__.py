@@ -75,6 +75,7 @@ class NCOSForeignDataWrapper(ForeignDataWrapper):
             log_to_postgres(message=payload, level=logging.WARNING)
             key = self.prefix + str(uuid.uuid4())
             s3.put_object(Bucket=self.bucket, Key=key, Body=payload)
+            self.buffer = []
         else:
             raise NotImplementedError(
                 "This FDW does not support the {} format".format(self.format))
