@@ -41,7 +41,10 @@ class NCOSForeignDataWrapper(ForeignDataWrapper):
             if self.store_as == 'gzip':
                 body = zlib.decompress(body)
             for row in body.split('\n'):
-                record = json.loads(row.split('\t')[2])
+                if self.format == 'json':
+                    record = json.loads(row)
+                else:
+                    record = json.loads(row.split('\t')[2])
                 yield record
 
     @property
