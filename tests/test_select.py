@@ -60,7 +60,8 @@ def test_select(store_as):
                    endpoint 'http://localhost:4569',\
                    access_key 'access_key',\
                    secret_key 'secret_key',\
-                   store_as '{}'\
+                   store_as '{}',\
+                   format 'fluentd'\
                  );".format(store_as))
     con.commit()
     cur.execute("SELECT * FROM ncos_example")
