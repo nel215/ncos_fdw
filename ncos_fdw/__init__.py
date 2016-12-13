@@ -4,6 +4,7 @@ from multicorn.utils import log_to_postgres
 import logging
 import zlib
 import json
+import uuid
 import boto3
 from botocore.client import Config
 
@@ -19,6 +20,7 @@ class NCOSForeignDataWrapper(ForeignDataWrapper):
         self.bucket = options['bucket']
         self.prefix = options['prefix']
         self.store_as = options['store_as']
+        self.buffer = []
         log_to_postgres(message=str(options), level=logging.WARNING)
 
     def execute(self, quals, columns):
@@ -40,3 +42,31 @@ class NCOSForeignDataWrapper(ForeignDataWrapper):
             for row in body.split('\n'):
                 record = json.loads(row.split('\t')[2])
                 yield record
+
+    @property
+    def rowid_column(self):
+        return 'id'
+
+    def insert(self, values):
+        log_to_postgres(message=str(values), level=logging.WARNING)
+        self.buffer.append(values)
+        return {}
+
+    def commit(self):
+        if len(self.buffer) == 0:
+            return
+
+        s3 = boto3.client(
+            's3',
+            aws_access_key_id=self.access_key,
+            aws_secret_access_key=self.secret_key,
+            endpoint_url=self.endpoint,
+            config=Config(signature_version='s3'),
+        )
+        s3.create_bucket(
+            Bucket=self.bucket,
+        )
+        payload = '\n'.join(map(lambda row: json.dumps(row), self.buffer))
+        log_to_postgres(message=payload, level=logging.WARNING)
+        key = self.prefix + str(uuid.uuid4())
+        s3.put_object(Bucket=self.bucket, Key=key, Body=payload)
