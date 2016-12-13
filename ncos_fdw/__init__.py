@@ -20,6 +20,7 @@ class NCOSForeignDataWrapper(ForeignDataWrapper):
         self.bucket = options['bucket']
         self.prefix = options['prefix']
         self.store_as = options['store_as']
+        self.format = options['format']
         self.buffer = []
         log_to_postgres(message=str(options), level=logging.WARNING)
 
@@ -66,7 +67,10 @@ class NCOSForeignDataWrapper(ForeignDataWrapper):
         s3.create_bucket(
             Bucket=self.bucket,
         )
-        payload = '\n'.join(map(lambda row: json.dumps(row), self.buffer))
-        log_to_postgres(message=payload, level=logging.WARNING)
-        key = self.prefix + str(uuid.uuid4())
-        s3.put_object(Bucket=self.bucket, Key=key, Body=payload)
+        if self.format == 'json':
+            payload = '\n'.join(map(lambda row: json.dumps(row), self.buffer))
+            log_to_postgres(message=payload, level=logging.WARNING)
+            key = self.prefix + str(uuid.uuid4())
+            s3.put_object(Bucket=self.bucket, Key=key, Body=payload)
+        else:
+            raise NotImplementedError("This FDW does not support the {} format".format(self.format))

@@ -21,7 +21,8 @@ def test_insert():
                    endpoint 'http://localhost:4569',\
                    access_key 'access_key',\
                    secret_key 'secret_key',\
-                   store_as 'text'\
+                   store_as 'text',\
+                   format 'json'\
                  );")
     cur.execute("INSERT INTO ncos_example (id, key) VALUES (1, 'v1'), (2, 'v2')")
     con.commit()
