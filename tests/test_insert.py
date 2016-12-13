@@ -1,5 +1,25 @@
 # coding:utf-8
 import psycopg2
+import pytest
+import boto3
+from botocore.client import Config
+
+
+@pytest.fixture(
+    autouse=True,
+    scope='module',
+)
+def prepare():
+    s3 = boto3.client(
+        's3',
+        aws_access_key_id='access_key',
+        aws_secret_access_key='secret_key',
+        endpoint_url='http://localhost:4569',
+        config=Config(signature_version='s3'),
+    )
+    obj_list = s3.list_objects(Bucket='test', Prefix='insert/')
+    for c in obj_list.get('Contents', []):
+        s3.delete_object(Bucket='test', Key=c['Key'])
 
 
 def test_insert():
