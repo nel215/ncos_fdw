@@ -76,4 +76,5 @@ class NCOSForeignDataWrapper(ForeignDataWrapper):
             key = self.prefix + str(uuid.uuid4())
             s3.put_object(Bucket=self.bucket, Key=key, Body=payload)
         else:
-            raise NotImplementedError("This FDW does not support the {} format".format(self.format))
+            raise NotImplementedError(
+                "This FDW does not support the {} format".format(self.format))

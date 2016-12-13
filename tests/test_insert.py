@@ -44,7 +44,8 @@ def test_insert():
                    store_as 'text',\
                    format 'json'\
                  );")
-    cur.execute("INSERT INTO ncos_example (id, key) VALUES (1, 'v1'), (2, 'v2')")
+    cur.execute(
+        "INSERT INTO ncos_example (id, key) VALUES (1, 'v1'), (2, 'v2')")
     con.commit()
 
     cur.execute("SELECT * FROM ncos_example")
